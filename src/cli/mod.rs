@@ -10,5 +10,12 @@ pub struct Cli;
 
 pub fn run() {
     let _cli = Cli::parse();
-    println!("SysTrace initialized.");
+
+    if !crate::system_metrics::is_linux() {
+        eprintln!("SysTrace requires a Linux environment.");
+        std::process::exit(1);
+    }
+
+    let info = crate::system_metrics::collect();
+    crate::system_metrics::display(&info);
 }
