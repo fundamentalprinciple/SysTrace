@@ -1,3 +1,5 @@
+pub mod cpu;
+
 use std::ffi::CString;
 use std::fs;
 use std::path::Path;

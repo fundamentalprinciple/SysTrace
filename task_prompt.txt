@@ -1,7 +1,0 @@
-task prompt:
-
-Guide me for the task in attached screenshot.
-One step at a time and wait for my results before moving on to next.
-Use less words in your responses and more code.
-Give me only patch scripts to modify the codebase.
-Before starting the task, you can make me run only one inspection script/commands initially. Inspection in the middle of task is okay but only one inspection is allowed before starting task.
