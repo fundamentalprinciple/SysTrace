@@ -11,6 +11,10 @@ pub struct Cli {
     #[arg(long)]
     cpu: bool,
 
+    /// Enable continuous memory monitoring
+    #[arg(long)]
+    memory: bool,
+
     /// CPU monitoring refresh interval in seconds
     #[arg(long, default_value_t = 1, value_parser = clap::value_parser!(u64).range(1..))]
     interval: u64,
@@ -22,6 +26,19 @@ pub fn run() {
     if !crate::system_metrics::is_linux() {
         eprintln!("SysTrace requires a Linux environment.");
         std::process::exit(1);
+    }
+
+    if cli.cpu && cli.memory {
+        eprintln!("Choose either --cpu or --memory.");
+        std::process::exit(1);
+    }
+
+    if cli.memory {
+        if let Err(error) = crate::system_metrics::memory::monitor(cli.interval) {
+            eprintln!("Memory monitoring failed: {error}");
+            std::process::exit(1);
+        }
+        return;
     }
 
     if cli.cpu {

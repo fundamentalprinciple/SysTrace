@@ -1,4 +1,5 @@
 pub mod cpu;
+pub mod memory;
 
 use std::ffi::CString;
 use std::fs;
