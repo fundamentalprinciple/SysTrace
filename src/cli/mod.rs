@@ -15,6 +15,10 @@ pub struct Cli {
     #[arg(long)]
     memory: bool,
 
+    /// Enable continuous disk and filesystem monitoring
+    #[arg(long)]
+    disk: bool,
+
     /// CPU monitoring refresh interval in seconds
     #[arg(long, default_value_t = 1, value_parser = clap::value_parser!(u64).range(1..))]
     interval: u64,
@@ -28,9 +32,17 @@ pub fn run() {
         std::process::exit(1);
     }
 
-    if cli.cpu && cli.memory {
-        eprintln!("Choose either --cpu or --memory.");
+    if (cli.cpu as u8 + cli.memory as u8 + cli.disk as u8) > 1 {
+        eprintln!("Choose only one of --cpu, --memory, or --disk.");
         std::process::exit(1);
+    }
+
+    if cli.disk {
+        if let Err(error) = crate::system_metrics::disk::monitor(cli.interval) {
+            eprintln!("Disk monitoring failed: {error}");
+            std::process::exit(1);
+        }
+        return;
     }
 
     if cli.memory {
