@@ -19,7 +19,19 @@ pub struct Cli {
     #[arg(long)]
     disk: bool,
 
-    /// CPU monitoring refresh interval in seconds
+    /// Enable network traffic monitoring
+    #[arg(long)]
+    network: bool,
+
+    /// Monitor only the specified network interface
+    #[arg(long)]
+    interface: Option<String>,
+
+    /// Include the loopback interface
+    #[arg(long)]
+    include_loopback: bool,
+
+    /// Monitoring refresh interval in seconds
     #[arg(long, default_value_t = 1, value_parser = clap::value_parser!(u64).range(1..))]
     interval: u64,
 }
@@ -32,9 +44,21 @@ pub fn run() {
         std::process::exit(1);
     }
 
-    if (cli.cpu as u8 + cli.memory as u8 + cli.disk as u8) > 1 {
-        eprintln!("Choose only one of --cpu, --memory, or --disk.");
+    if (cli.cpu as u8 + cli.memory as u8 + cli.disk as u8 + cli.network as u8) > 1 {
+        eprintln!("Choose only one monitoring mode: --cpu, --memory, --disk, or --network.");
         std::process::exit(1);
+    }
+
+    if cli.network {
+        if let Err(error) = crate::system_metrics::network::monitor(
+            cli.interval,
+            cli.interface.as_deref(),
+            cli.include_loopback,
+        ) {
+            eprintln!("Network monitoring failed: {error}");
+            std::process::exit(1);
+        }
+        return;
     }
 
     if cli.disk {
